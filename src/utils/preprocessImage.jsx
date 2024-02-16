@@ -1,6 +1,5 @@
-import imageSrc from "../assets/test.jpg";
 import cv from "@techstark/opencv-js";
-export default async function preprocessImage() {
+export default async function preprocessImage(imageSrc) {
   return new Promise((resolve, reject) => {
     const imgElement = new Image();
     imgElement.crossOrigin = "Anonymous";
