@@ -7,12 +7,13 @@ import {
   DialogFooter,
 } from "@material-tailwind/react";
 import WebcamCapture from "./WebcamCapture";
+import useParseImage from "../hooks/useParseImage";
 
 export default function DialogBox({ open, handleOpen }) {
   const [captureImage, setCaptureImage] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
+  useParseImage(imageSrc);
   const handleCapture = (imageSrc) => {
-    console.log(imageSrc);
     setImageSrc(imageSrc);
   };
   return (
