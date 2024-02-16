@@ -1,18 +1,23 @@
-import React, { useRef } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 
-const WebcamCapture = ({ onCapture }) => {
+const WebcamCapture = ({ onCapture, captureImage }) => {
   const webcamRef = useRef(null);
 
-  const capture = React.useCallback(() => {
+  const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     onCapture(imageSrc);
   }, [webcamRef, onCapture]);
 
+  useEffect(() => {
+    if (captureImage) {
+      capture();
+    }
+  }, [captureImage]);
+
   return (
     <>
       <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" />
-      <button onClick={capture}>Capture</button>
     </>
   );
 };

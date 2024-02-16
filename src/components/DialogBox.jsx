@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   Dialog,
@@ -5,8 +6,10 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
+import WebcamCapture from "./WebcamCapture";
 
 export default function DialogBox({ open, handleOpen }) {
+  const [captureImage, setCaptureImage] = useState(false);
   return (
     <div>
       <Dialog
@@ -24,6 +27,9 @@ export default function DialogBox({ open, handleOpen }) {
         <DialogBody className="font-semibold">
           Put your Driver's License in front of the camera and click on the
           Capture button to extract all the details.
+          <div className="flex items-center flex-col mt-5">
+            <WebcamCapture />
+          </div>
         </DialogBody>
         <DialogFooter>
           <Button
@@ -38,7 +44,7 @@ export default function DialogBox({ open, handleOpen }) {
             className="py-1 px-6 w-fit text-white font-semibold text-lg bg-blue-500 rounded-md transition-all duration-300 hover:bg-blue-400 capitalize"
             data-ripple-light="true"
             data-dialog-target="animated-dialog"
-            onClick={handleOpen}
+            onClick={() => setCaptureImage(true)}
           >
             <span>Capture</span>
           </Button>
