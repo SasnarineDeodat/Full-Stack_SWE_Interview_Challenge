@@ -29,7 +29,7 @@ export default function preprocessImage() {
 function resizeImage(img, canvas, ctx) {
   const maxWidth = 2000; // Keep these dimensions or adjust based on your needs
   const maxHeight = 1800;
-  let scaleFactor = 1;
+  let scaleFactor = 2;
   if (img.width > maxWidth || img.height > maxHeight) {
     scaleFactor = Math.min(maxWidth / img.width, maxHeight / img.height);
   }
@@ -42,104 +42,99 @@ function resizeImage(img, canvas, ctx) {
 
 function preprocessImageData(imageData) {
   // Preprocessing steps
-  // dynamicAdjustContrast(imageData);
-  // blurARGB(imageData, 0); // Light blur to reduce noise
-  // advancedSharpen(imageData); // Sharpen to enhance edges
-  improvedAdaptiveThreshold(imageData, 100, 60); // Adaptive threshold for clear binary image
+  blurARGB(imageData, 1); // Light blur to reduce noise
+  otsuThreshold(imageData); // Otsu threshold for clear binary image
 }
 
 function advancedSharpen(imageData) {
-  // Placeholder for an advanced sharpening algorithm
-  const blurRadius = 0; // Smaller radius for a subtle effect
-  const amount = 1; // Higher amount for more sharpening
+  const blurRadius = 1; // Consider implementing a real blur function with this radius
+  const amount = 2; // Increase the amount for more pronounced sharpening
+
   let blurredImageData = new ImageData(
     new Uint8ClampedArray(imageData.data),
     imageData.width,
     imageData.height,
   );
+
   blurARGB(blurredImageData, blurRadius); // Apply blur for the unsharp mask
+
+  // Implementing a basic edge detection might go here
+  // For now, we'll proceed without it for simplicity
 
   // Unsharp mask: subtract the blurred image from the original
   for (let i = 0; i < imageData.data.length; i += 4) {
     for (let channel = 0; channel < 3; channel++) {
       let originalVal = imageData.data[i + channel];
       let blurredVal = blurredImageData.data[i + channel];
+      // Sharpen more by increasing the difference applied
       let newVal = originalVal + (originalVal - blurredVal) * amount;
       imageData.data[i + channel] = Math.min(255, Math.max(0, newVal));
     }
   }
 }
 
-function improvedAdaptiveThreshold(imageData, blockSize = 9, C = 5) {
-  const width = imageData.width,
-    height = imageData.height;
-  const halfBlockSize = Math.floor(blockSize / 2);
-  let sumMatrix = buildIntegralImage(imageData);
+function otsuThreshold(imageData) {
+  const histogram = new Array(256).fill(0);
+  const width = imageData.width;
+  const height = imageData.height;
+  let total = 0;
 
-  // Loop through each pixel in the image
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      // Calculate the bounds of the block
-      let x1 = Math.max(0, x - halfBlockSize);
-      let y1 = Math.max(0, y - halfBlockSize);
-      let x2 = Math.min(width - 1, x + halfBlockSize);
-      let y2 = Math.min(height - 1, y + halfBlockSize);
+  // Step 1: Calculate histogram
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const brightness = Math.floor(
+      0.299 * imageData.data[i] +
+        0.587 * imageData.data[i + 1] +
+        0.114 * imageData.data[i + 2],
+    );
+    histogram[brightness]++;
+    total++;
+  }
 
-      // Correct for integral image index (start from 1,1 due to how integral is calculated)
-      let count = (x2 - x1 + 1) * (y2 - y1 + 1);
-      let sum =
-        sumMatrix[y2 + 1][x2 + 1] -
-        sumMatrix[y1][x2 + 1] -
-        sumMatrix[y2 + 1][x1] +
-        sumMatrix[y1][x1];
+  // Step 2: Calculate total mean
+  let sum = 0;
+  for (let i = 0; i < 256; i++) {
+    sum += i * histogram[i];
+  }
 
-      // Calculate the threshold and apply it
-      let index = (y * width + x) * 4;
-      let brightness =
-        0.299 * imageData.data[index] +
-        0.587 * imageData.data[index + 1] +
-        0.114 * imageData.data[index + 2];
-      let threshold = sum / count - C;
+  let sumB = 0;
+  let wB = 0;
+  let wF = 0;
+  let varMax = 0;
+  let threshold = 0;
 
-      if (brightness < threshold) {
-        imageData.data[index] =
-          imageData.data[index + 1] =
-          imageData.data[index + 2] =
-            0;
-      } else {
-        imageData.data[index] =
-          imageData.data[index + 1] =
-          imageData.data[index + 2] =
-            255;
-      }
-      imageData.data[index + 3] = 255; // Ensure full opacity for alpha channel
+  // Step 3: Otsu's Threshold Calculation
+  for (let i = 0; i < 256; i++) {
+    wB += histogram[i];
+    if (wB === 0) continue;
+    wF = total - wB;
+    if (wF === 0) break;
+
+    sumB += i * histogram[i];
+    let mB = sumB / wB;
+    let mF = (sum - sumB) / wF;
+
+    // Calculate Between Class Variance
+    let varBetween = wB * wF * (mB - mF) * (mB - mF);
+    // Check if new maximum found
+    if (varBetween > varMax) {
+      varMax = varBetween;
+      threshold = i;
     }
   }
-}
 
-function buildIntegralImage(imageData) {
-  const width = imageData.width,
-    height = imageData.height;
-  let integralImage = Array.from({ length: height + 1 }, () =>
-    new Array(width + 1).fill(0),
-  );
-
-  // Compute the integral image
-  for (let y = 1; y <= height; y++) {
-    for (let x = 1; x <= width; x++) {
-      let index = ((y - 1) * width + (x - 1)) * 4;
-      let brightness =
-        0.299 * imageData.data[index] +
-        0.587 * imageData.data[index + 1] +
-        0.114 * imageData.data[index + 2];
-      integralImage[y][x] =
-        brightness +
-        integralImage[y - 1][x] +
-        integralImage[y][x - 1] -
-        integralImage[y - 1][x - 1];
-    }
+  // Step 4: Apply Threshold
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    const brightness =
+      0.299 * imageData.data[i] +
+      0.587 * imageData.data[i + 1] +
+      0.114 * imageData.data[i + 2];
+    let binarizedValue = brightness > threshold ? 255 : 0;
+    imageData.data[i] =
+      imageData.data[i + 1] =
+      imageData.data[i + 2] =
+        binarizedValue;
+    imageData.data[i + 3] = 255; // Ensure full opacity for alpha channel
   }
-  return integralImage;
 }
 
 function dynamicAdjustContrast(imageData) {

@@ -15,7 +15,8 @@ export default function useParseImage(imageSrc) {
     document.body.appendChild(imgTag);
     const worker = await createWorker("eng");
     await worker.setParameters({
-      tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ,/",
+      tessedit_char_whitelist:
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/",
     });
     const ret = await worker.recognize(imageUrl);
     console.log(ret.data.text);
