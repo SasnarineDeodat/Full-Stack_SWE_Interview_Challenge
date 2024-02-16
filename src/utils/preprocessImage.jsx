@@ -24,38 +24,25 @@ async function preprocessImage() {
       // Apply Gaussian Blur
       // cv.GaussianBlur(grayMat, blurredMat, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
 
+      // Sharpening with Unsharp Mask
+      let unsharpMask = new cv.Mat();
+      let ksize = new cv.Size(5, 5); // Consider smaller kernel for finer details
+      cv.GaussianBlur(grayMat, blurredMat, ksize, 0, 0, cv.BORDER_DEFAULT);
+      cv.addWeighted(grayMat, 1.5, blurredMat, -0.5, 0, unsharpMask); // Increase contrast in addWeighted for more sharpness
+
       // Apply Otsu's Thresholding
-      cv.threshold(grayMat, thresholdMat, 0, 255, cv.THRESH_OTSU);
+      cv.threshold(unsharpMask, thresholdMat, 0, 255, cv.THRESH_OTSU);
 
+      // Making text bolder with careful morphological operations
       let morphMat = new cv.Mat();
-      const M = cv.Mat.ones(2, 2, cv.CV_8U); // Smaller structuring element
-      const anchor = new cv.Point(-1, -1);
+      const M = cv.Mat.ones(1, 1, cv.CV_8U); // Use a very small structuring element
+      cv.dilate(thresholdMat, morphMat, M, new cv.Point(-1, -1), 1); // Slight dilation to bolden text
 
-      // Apply morphological opening to remove noise
-      cv.erode(
-        thresholdMat,
-        morphMat,
-        M,
-        anchor,
-        1,
-        cv.BORDER_CONSTANT,
-        cv.morphologyDefaultBorderValue(),
-      );
-      cv.dilate(
-        morphMat,
-        morphMat,
-        M,
-        anchor,
-        1,
-        cv.BORDER_CONSTANT,
-        cv.morphologyDefaultBorderValue(),
-      );
+      // Slight erosion to maintain clarity between characters
+      let finalMat = new cv.Mat();
+      cv.erode(morphMat, finalMat, M, new cv.Point(-1, -1), 1); // Adjust iteration count as needed
 
-      // Optionally, apply morphological closing to close small holes within text, if necessary
-      // cv.dilate(morphMat, morphMat, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-      // cv.erode(morphMat, morphMat, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-      cv.imshow(canvas, morphMat); // Display the processed image on the canvas
+      cv.imshow(canvas, finalMat); // Display the processed image on the canvas
 
       // Convert canvas to Blob
       canvas.toBlob((blob) => {
