@@ -1,82 +1,70 @@
 import imageSrc from "../assets/test.jpg";
-import cv, { resize } from "@techstark/opencv-js";
-
-async function preprocessImage() {
+import cv from "@techstark/opencv-js";
+export default async function preprocessImage() {
   return new Promise((resolve, reject) => {
     const imgElement = new Image();
-    imgElement.crossOrigin = "Anonymous"; // Ensure CORS policy compliance if necessary
+    imgElement.crossOrigin = "Anonymous";
     imgElement.src = imageSrc;
     imgElement.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = imgElement.width;
-      canvas.height = imgElement.height;
+
+      // Assuming the target DPI is 300 and the image size corresponds to a standard ID size,
+      // calculate the scaling factor to simulate this DPI.
+      const dpiScalingFactor = calculateDpiScalingFactor(imgElement, 300);
+      canvas.width = imgElement.width * dpiScalingFactor;
+      canvas.height = imgElement.height * dpiScalingFactor;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+
       let srcMat = cv.imread(canvas);
-      let resizedMat = resizeImage(srcMat, 1200);
       let grayMat = new cv.Mat();
-      let blurredMat = new cv.Mat();
+      cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
+
+      // Enhanced Sharpening
+      let laplacianMat = new cv.Mat();
+      // cv.Laplacian(grayMat, laplacianMat, cv.CV_8U, 1, 1, 0, cv.BORDER_DEFAULT);
+      let sharpMat = new cv.Mat();
+      // cv.add(grayMat, laplacianMat, sharpMat);
+
+      // Apply Otsu's Thresholding after sharpening
       let thresholdMat = new cv.Mat();
+      cv.threshold(
+        grayMat,
+        thresholdMat,
+        0,
+        255,
+        cv.THRESH_BINARY + cv.THRESH_OTSU,
+      );
 
-      // Convert to Grayscale
-      cv.cvtColor(resizedMat, grayMat, cv.COLOR_RGBA2GRAY);
-
-      // Apply Gaussian Blur
-      // cv.GaussianBlur(grayMat, blurredMat, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
-
-      // Sharpening with Unsharp Mask
-      let unsharpMask = new cv.Mat();
-      let ksize = new cv.Size(5, 5); // Consider smaller kernel for finer details
-      cv.GaussianBlur(grayMat, blurredMat, ksize, 0, 0, cv.BORDER_DEFAULT);
-      cv.addWeighted(grayMat, 1.5, blurredMat, -0.5, 0, unsharpMask); // Increase contrast in addWeighted for more sharpness
-
-      // Apply Otsu's Thresholding
-      cv.threshold(unsharpMask, thresholdMat, 0, 255, cv.THRESH_OTSU);
-
-      // Making text bolder with careful morphological operations
+      // Slight Dilation to make text bolder, using a very small structuring element
       let morphMat = new cv.Mat();
-      const M = cv.Mat.ones(1, 1, cv.CV_8U); // Use a very small structuring element
-      cv.dilate(thresholdMat, morphMat, M, new cv.Point(-1, -1), 1); // Slight dilation to bolden text
+      const M = cv.Mat.ones(1, 1, cv.CV_8U);
+      cv.dilate(thresholdMat, morphMat, M);
 
-      // Slight erosion to maintain clarity between characters
-      let finalMat = new cv.Mat();
-      cv.erode(morphMat, finalMat, M, new cv.Point(-1, -1), 1); // Adjust iteration count as needed
-
-      cv.imshow(canvas, finalMat); // Display the processed image on the canvas
+      cv.imshow(canvas, thresholdMat); // Display the processed image on the canvas
 
       // Convert canvas to Blob
       canvas.toBlob((blob) => {
         resolve(blob);
       }, "image/png");
 
-      // Clean up
+      // Cleanup
       srcMat.delete();
-      resizedMat.delete();
       grayMat.delete();
-      blurredMat.delete();
+      laplacianMat.delete();
+      sharpMat.delete();
       thresholdMat.delete();
+      morphMat.delete();
+      M.delete();
     };
-    imgElement.onerror = () => {
-      reject(new Error("Image could not be loaded."));
-    };
+    imgElement.onerror = () => reject(new Error("Image could not be loaded."));
   });
 }
 
-function resizeImage(srcMat, targetHeight) {
-  const aspectRatio = srcMat.cols / srcMat.rows;
-  let targetWidth;
-
-  if (srcMat.rows > srcMat.cols) {
-    targetWidth = Math.floor(targetHeight * aspectRatio);
-  } else {
-    targetWidth = targetHeight;
-    targetHeight = Math.floor(targetWidth / aspectRatio);
-  }
-
-  let dsize = new cv.Size(targetWidth, targetHeight);
-  let dst = new cv.Mat();
-  cv.resize(srcMat, dst, dsize, 0, 0, cv.INTER_AREA);
-  return dst;
+function calculateDpiScalingFactor(imgElement, targetDpi) {
+  const standardPrintWidthInches = 3.375; // Example for a driver's license or ID card width
+  const requiredPixelWidth = standardPrintWidthInches * targetDpi;
+  return requiredPixelWidth / imgElement.width; // Scaling factor to simulate target DPI
 }
-
-export default preprocessImage;

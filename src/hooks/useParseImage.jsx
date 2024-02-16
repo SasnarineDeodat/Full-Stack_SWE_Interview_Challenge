@@ -18,7 +18,8 @@ export default function useParseImage(imageSrc) {
         const worker = await createWorker("eng");
         await worker.setParameters({
           tessedit_char_whitelist:
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/-",
+          user_defined_dpi: "72",
         });
         const ret = await worker.recognize(imageUrl);
         console.log(ret.data.text);
