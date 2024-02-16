@@ -17,7 +17,14 @@ const WebcamCapture = ({ onCapture, captureImage }) => {
 
   return (
     <>
-      <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" />
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        screenshotQuality={1}
+        minScreenshotHeight={1200}
+        minScreenshotWidth={1200}
+      />
     </>
   );
 };
