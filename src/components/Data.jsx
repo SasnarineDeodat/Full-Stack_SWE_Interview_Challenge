@@ -24,14 +24,14 @@ export default function Data() {
       <div className="flex justify-center mt-8">
         {location.state && (
           <img
-            className="max-w-xl rounded-md"
+            className="w-full max-w-xl rounded-md px-5"
             src={location.state?.image}
             alt="Your Drivers License"
           />
         )}
       </div>
       <h1 className="text-4xl font-semibold text-center mt-4">Your Data</h1>
-      <div className="md:mx-14 mt-5">
+      <div className="md:mx-14 mt-5 mx-5">
         <ul>
           <li className="text-xl font-semibold pb-4">
             Name: {location.state?.name}
