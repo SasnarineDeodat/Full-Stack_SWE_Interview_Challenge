@@ -1,4 +1,4 @@
-function parseDriverLicenseData(ocrText) {
+export default function parseData(ocrText) {
   const data = {
     Name: null,
     DOB: null,

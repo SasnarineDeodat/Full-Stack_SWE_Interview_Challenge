@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createWorker } from "tesseract.js";
 import preprocessImage from "../utils/preprocessImage";
 import { useNavigate } from "react-router-dom";
+import parseData from "../utils/parseData";
 
 export default function useParseImage(imageSrc, handleOpen) {
   const [text, setText] = useState("");
@@ -26,7 +27,8 @@ export default function useParseImage(imageSrc, handleOpen) {
         await worker.terminate();
         setLoading(false);
         handleOpen();
-        navigate("/data", { state: { image: imageSrc } });
+        const data = parseData(ret.data.text);
+        navigate("/data", { state: { image: imageSrc, ...data } });
       } catch (error) {
         console.error("OCR processing failed:", error);
         setText("Error processing image");
