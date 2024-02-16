@@ -1,8 +1,17 @@
-# React + Vite
+# DL-Extractor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is an app that allows the users to extract information from his/her Driver's License in a user-friendly way.
 
-Currently, two official plugins are available:
+# Start the project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Before you proceed, make sure that you have [Node](https://nodejs.org/en) installed in your computer.
+
+Clone this repository, then install the packages by running this command in your terminal:
+
+### `npm i`
+
+After that, run this command to start the Vite server:
+
+### `npm run dev`
+
+Vite will give you a link to spin up the web app in your browser. Open the url in your browser and you are good to go.
