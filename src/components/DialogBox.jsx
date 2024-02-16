@@ -12,7 +12,7 @@ import useParseImage from "../hooks/useParseImage";
 export default function DialogBox({ open, handleOpen }) {
   const [captureImage, setCaptureImage] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
-  useParseImage(imageSrc);
+  useParseImage(imageSrc, handleOpen);
   const handleCapture = (imageSrc) => {
     setImageSrc(imageSrc);
   };

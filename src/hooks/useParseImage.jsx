@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { createWorker } from "tesseract.js";
 import preprocessImage from "../utils/preprocessImage";
+import { useNavigate } from "react-router-dom";
 
-export default function useParseImage(imageSrc) {
+export default function useParseImage(imageSrc, handleOpen) {
   const [text, setText] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!imageSrc) return;
@@ -12,17 +14,16 @@ export default function useParseImage(imageSrc) {
       try {
         const processedImageBlob = await preprocessImage(imageSrc);
         const imageUrl = URL.createObjectURL(processedImageBlob);
-        const imgTag = document.createElement("img");
-        imgTag.src = imageUrl;
-        document.body.appendChild(imgTag);
         const worker = await createWorker("eng");
         await worker.setParameters({
           tessedit_char_whitelist:
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/-",
         });
         const ret = await worker.recognize(imageUrl);
-        console.log(ret.data.text);
+        setText(ret.data.text);
         await worker.terminate();
+        handleOpen();
+        navigate("/data", { state: { image: imageSrc } });
       } catch (error) {
         console.error("OCR processing failed:", error);
         setText("Error processing image");
