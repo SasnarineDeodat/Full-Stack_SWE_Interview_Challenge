@@ -1,4 +1,5 @@
 import logo from "../assets/logo.png";
+import DarkMode from "./DarkMode";
 
 export default function Navbar() {
   return (
@@ -11,6 +12,7 @@ export default function Navbar() {
           Extract Data
         </button>
       </div>
+      <DarkMode />
     </div>
   );
 }
