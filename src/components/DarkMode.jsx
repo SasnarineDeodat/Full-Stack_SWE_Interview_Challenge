@@ -3,15 +3,9 @@ import sun from "../assets/sun.svg";
 import moon from "../assets/moon.svg";
 
 export default function DarkMode() {
-  const [theme, setTheme] = useState("dark");
-
-  useLayoutEffect(() => {
-    if (localStorage.getItem("selectedTheme") === "light") {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
-  }, []);
+  const [theme, setTheme] = useState(
+    localStorage.getItem("selectedTheme") || "dark",
+  );
 
   useLayoutEffect(() => {
     if (theme === "light") {
