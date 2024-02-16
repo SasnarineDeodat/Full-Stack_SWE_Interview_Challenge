@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Spinner } from "@material-tailwind/react";
 import {
   Button,
   Dialog,
@@ -12,10 +13,16 @@ import useParseImage from "../hooks/useParseImage";
 export default function DialogBox({ open, handleOpen }) {
   const [captureImage, setCaptureImage] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
-  useParseImage(imageSrc, handleOpen);
+  const loading = useParseImage(imageSrc, handleOpen);
   const handleCapture = (imageSrc) => {
     setImageSrc(imageSrc);
   };
+  useEffect(() => {
+    if (!loading) {
+      setImageSrc(null);
+      setCaptureImage(false);
+    }
+  }, [loading]);
   return (
     <div>
       <Dialog
@@ -33,14 +40,22 @@ export default function DialogBox({ open, handleOpen }) {
         <DialogBody className="font-semibold overflow-y-auto">
           Put your Driver's License in front of the camera and click on the
           Capture button to extract all the details.
-          <div className="flex items-center flex-col mt-5">
+          <div className="flex items-center flex-col mt-5 relative">
+            <div className="absolute top-1/2 left-1/2">
+              {loading && <Spinner className="h-16 w-16" />}
+            </div>
             {!imageSrc ? (
               <WebcamCapture
                 onCapture={handleCapture}
                 captureImage={captureImage}
+                className="max-w-screen-sm w-full"
               />
             ) : (
-              <img src={imageSrc} alt="DL Extractor" />
+              <img
+                src={imageSrc}
+                alt="DL Extractor"
+                className="max-w-screen-sm w-full"
+              />
             )}
           </div>
         </DialogBody>
@@ -50,6 +65,7 @@ export default function DialogBox({ open, handleOpen }) {
             color="red"
             onClick={handleOpen}
             className="mr-1 text-red-400"
+            disabled={imageSrc ? true : false}
           >
             <span>Cancel</span>
           </Button>

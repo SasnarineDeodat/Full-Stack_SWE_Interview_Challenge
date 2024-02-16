@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function useParseImage(imageSrc, handleOpen) {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,6 +13,7 @@ export default function useParseImage(imageSrc, handleOpen) {
 
     const processAndRecognizeImage = async () => {
       try {
+        setLoading(true);
         const processedImageBlob = await preprocessImage(imageSrc);
         const imageUrl = URL.createObjectURL(processedImageBlob);
         const worker = await createWorker("eng");
@@ -22,6 +24,7 @@ export default function useParseImage(imageSrc, handleOpen) {
         const ret = await worker.recognize(imageUrl);
         setText(ret.data.text);
         await worker.terminate();
+        setLoading(false);
         handleOpen();
         navigate("/data", { state: { image: imageSrc } });
       } catch (error) {
@@ -33,5 +36,5 @@ export default function useParseImage(imageSrc, handleOpen) {
     processAndRecognizeImage();
   }, [imageSrc]);
 
-  return text;
+  return loading;
 }
