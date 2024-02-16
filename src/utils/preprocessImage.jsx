@@ -22,30 +22,56 @@ export default async function preprocessImage() {
       let grayMat = new cv.Mat();
       cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
 
+      // Noise reduction while preserving edges
+      let bilateralFilterMat = new cv.Mat();
+      cv.bilateralFilter(
+        grayMat,
+        bilateralFilterMat,
+        9,
+        75,
+        75,
+        cv.BORDER_DEFAULT,
+      );
+
       // Enhanced Sharpening
       let laplacianMat = new cv.Mat();
-      // cv.Laplacian(grayMat, laplacianMat, cv.CV_8U, 1, 1, 0, cv.BORDER_DEFAULT);
+      cv.Laplacian(
+        bilateralFilterMat,
+        laplacianMat,
+        cv.CV_8U,
+        1,
+        1,
+        0,
+        cv.BORDER_DEFAULT,
+      );
       let sharpMat = new cv.Mat();
-      // cv.add(grayMat, laplacianMat, sharpMat);
+      cv.addWeighted(
+        bilateralFilterMat,
+        1.75,
+        laplacianMat,
+        -0.75,
+        0,
+        sharpMat,
+      );
 
-      // Apply Otsu's Thresholding after sharpening
+      // Further Text Clarity Enhancement
       let thresholdMat = new cv.Mat();
       cv.threshold(
-        grayMat,
+        sharpMat,
         thresholdMat,
         0,
         255,
         cv.THRESH_BINARY + cv.THRESH_OTSU,
       );
 
-      // Slight Dilation to make text bolder, using a very small structuring element
-      let morphMat = new cv.Mat();
-      const M = cv.Mat.ones(1, 1, cv.CV_8U);
-      cv.dilate(thresholdMat, morphMat, M);
+      // Optional: Apply slight erosion to make text sharper
+      let textEnhancedMat = new cv.Mat();
+      const kernel = cv.Mat.ones(1, 2, cv.CV_8U); // Small kernel for minimal erosion
+      cv.erode(thresholdMat, textEnhancedMat, kernel);
 
-      cv.imshow(canvas, thresholdMat); // Display the processed image on the canvas
+      cv.imshow(canvas, textEnhancedMat); // Display the enhanced text image
 
-      // Convert canvas to Blob
+      // Convert canvas to Blob for OCR processing
       canvas.toBlob((blob) => {
         resolve(blob);
       }, "image/png");
@@ -53,11 +79,12 @@ export default async function preprocessImage() {
       // Cleanup
       srcMat.delete();
       grayMat.delete();
+      bilateralFilterMat.delete();
       laplacianMat.delete();
       sharpMat.delete();
       thresholdMat.delete();
-      morphMat.delete();
-      M.delete();
+      textEnhancedMat.delete();
+      kernel.delete();
     };
     imgElement.onerror = () => reject(new Error("Image could not be loaded."));
   });
