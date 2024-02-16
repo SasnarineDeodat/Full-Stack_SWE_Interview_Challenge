@@ -1,3 +1,4 @@
+import Data from "./components/Data";
 import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HeroSection />,
+      },
+      {
+        path: "data",
+        element: <Data />,
       },
     ],
   },
