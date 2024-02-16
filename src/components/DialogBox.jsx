@@ -10,6 +10,11 @@ import WebcamCapture from "./WebcamCapture";
 
 export default function DialogBox({ open, handleOpen }) {
   const [captureImage, setCaptureImage] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
+  const handleCapture = (imageSrc) => {
+    console.log(imageSrc);
+    setImageSrc(imageSrc);
+  };
   return (
     <div>
       <Dialog
@@ -24,11 +29,18 @@ export default function DialogBox({ open, handleOpen }) {
         <DialogHeader className="font-bold">
           Scan Your Driver's License
         </DialogHeader>
-        <DialogBody className="font-semibold">
+        <DialogBody className="font-semibold overflow-y-auto">
           Put your Driver's License in front of the camera and click on the
           Capture button to extract all the details.
           <div className="flex items-center flex-col mt-5">
-            <WebcamCapture />
+            {!imageSrc ? (
+              <WebcamCapture
+                onCapture={handleCapture}
+                captureImage={captureImage}
+              />
+            ) : (
+              <img src={imageSrc} alt="DL Extractor" />
+            )}
           </div>
         </DialogBody>
         <DialogFooter>
@@ -45,8 +57,9 @@ export default function DialogBox({ open, handleOpen }) {
             data-ripple-light="true"
             data-dialog-target="animated-dialog"
             onClick={() => setCaptureImage(true)}
+            disabled={imageSrc ? true : false}
           >
-            <span>Capture</span>
+            <span>{imageSrc ? "Loading..." : "Capture"}</span>
           </Button>
         </DialogFooter>
       </Dialog>
