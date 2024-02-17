@@ -1,98 +1,35 @@
-export default function parseData(ocrText) {
-  const data = {
-    Name: null,
-    DOB: null,
-    Address: null,
-    LicenseNumber: null,
-    ExpiryDate: null,
-  };
+export default function cleanDriverLicenseOCRText(ocrText) {
+  // Define patterns to remove common OCR noise and impurities across various states
+  const patternsToCorrect = [
+    { remove: /.*oL/gi, add: "DL" }, // Correct "oL" to "DL"
+    { remove: /CLASs/gi, add: "CLASS" }, // Correct "CLASs" to "CLASS"
+    { remove: /.*exp/gi, add: "EXPIRATION DATE" }, // Correct "dg N exp" to "EXP"
+    { remove: /.*LNCARDHOLDER/gi, add: "" }, // Remove ", LNCARDHOLDER"
+    { remove: /MMos/gi, add: "DOB" }, // Correct "MMos" to "DOB"
+    { remove: /.*Mos/gi, add: "DOB" }, // Correct "MMos" to "DOB"
+    { remove: /ARN i -/gi, add: "DONOR" }, // Correct "ARN i -" to "DONOR"
+    { remove: /.*VETERAN/gi, add: "VETERAN" }, // Correct "so VETERAN" to "VETERAN"
+    { remove: /SEX F.*/gi, add: "SEX F" }, // Remove everything from "SEX F" to "ISS"
+    { remove: /SEX M.*/gi, add: "SEX M" },
+    { remove: /.*FN/gi, add: "Full Name" }, // Replace 'FN' with 'Full Name'
+    { remove: /\bEYES BRN\b/gi, add: "EYES: BRN" },
+    { remove: /.*(iss|ISS)/gi, add: "Issue Date" },
+    { remove: /.*ANFD\/YY /gi, add: "" },
+  ];
 
-  const normalizedText = ocrText
-    .replace(/[|]/g, "I")
-    .replace(/DOB|D08/gi, "DOB")
-    .replace(/EXP|EXPI/gi, "EXP")
-    .replace(/DL|D[|]/gi, "DL");
+  let cleanedText = ocrText;
 
-  const lines = normalizedText.split("\n");
-
-  const namePattern = new RegExp(
-    "(?:LN|Name|Nama)[^\\w]*(\\w+),[^\\w]*(\\w+)",
-    "i",
-  );
-  const dobPattern = new RegExp(
-    "DOB[^\\w]*(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})",
-    "i",
-  );
-  const addressPattern = new RegExp("(\\d{1,5}[^\\d\\n]+\\w{2}\\s\\d{5})", "i");
-  const licenseNumberPattern = new RegExp("DL[^\\w]*([0-9a-zA-Z]+)", "i");
-  const expiryDatePattern = new RegExp(
-    "EXP[^\\w]*(\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})",
-    "i",
-  );
-
-  lines.forEach((line) => {
-    let match;
-
-    if (!data.Name && (match = line.match(namePattern))) {
-      data.Name = `${match[2]} ${match[1]}`;
-    }
-
-    if (!data.DOB && (match = line.match(dobPattern))) {
-      data.DOB = match[1].replace(/[/-]/g, "/");
-    }
-
-    if (!data.Address && (match = line.match(addressPattern))) {
-      data.Address = match[1].replace(/[\|]/g, "I");
-    }
-
-    if (!data.LicenseNumber && (match = line.match(licenseNumberPattern))) {
-      data.LicenseNumber = match[1].replace(/[Oo]/g, "0").replace(/[Il]/g, "1");
-    }
-
-    if (!data.ExpiryDate && (match = line.match(expiryDatePattern))) {
-      data.ExpiryDate = match[1].replace(/[/-]/g, "/");
-    }
+  // Apply corrections
+  patternsToCorrect.forEach(({ remove, add }) => {
+    cleanedText = cleanedText.replace(remove, add);
   });
 
-  data.Name = cleanupName(data.Name);
-  data.DOB = cleanupDate(data.DOB);
-  data.ExpiryDate = cleanupDate(data.ExpiryDate);
+  // Correct common OCR errors without altering line structure
+  cleanedText = cleanedText
+    .split("\n")
+    .map((line) => line.replace(/[\s]+/g, " ").trim()) // Collapse multiple spaces into one and trim
+    .filter((line) => line) // Remove empty lines
+    .join("\n");
 
-  return data;
-}
-
-function cleanupName(name) {
-  if (!name) return null;
-
-  name = name
-    .replace(/0/g, "O")
-    .replace(/1/g, "I")
-    .replace(/5/g, "S")
-    .replace(/8/g, "B")
-    .replace(/\|/g, "I")
-    .replace(/[\[\]{}]/g, "")
-    .replace(/[^a-zA-Z ,.'-]/g, "");
-
-  name = name
-    .toLowerCase()
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-
-  name = name.trim();
-
-  return name;
-}
-
-function cleanupDate(date) {
-  if (!date) return null;
-  const parts = date.split("/");
-  if (parts.length === 3) {
-    let month = parts[0].padStart(2, "0");
-    let day = parts[1].padStart(2, "0");
-    let year = parts[2];
-    if (year.length === 2) year = "20" + year;
-    return `${month}/${day}/${year}`;
-  }
-  return date;
+  return cleanedText;
 }
