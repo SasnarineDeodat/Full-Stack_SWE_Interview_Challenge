@@ -12,8 +12,11 @@ export default function cleanDriverLicenseOCRText(ocrText) {
     { remove: /SEX F.*/gi, add: "SEX F" }, // Remove everything from "SEX F" to "ISS"
     { remove: /SEX M.*/gi, add: "SEX M" },
     { remove: /.*FN/gi, add: "Full Name" }, // Replace 'FN' with 'Full Name'
-    { remove: /\bEYES BRN\b/gi, add: "EYES: BRN" },
-    { remove: /.*(iss|ISS)/gi, add: "Issue Date" },
+    { remove: /.*EYES.*/gi, add: "" },
+    { remove: /.*(iss|ISS|bss|1ss).*/gi, add: "Issue Date" },
+    { remove: /TOORVE/gi, add: "" },
+    { remove: /TO DRIVE/gi, add: "" },
+    { remove: /TODRIVE/gi, add: "" },
     { remove: /.*ANFD\/YY /gi, add: "" },
   ];
 
