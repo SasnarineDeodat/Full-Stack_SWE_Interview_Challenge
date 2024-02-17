@@ -45,33 +45,6 @@ function preprocessImageData(imageData) {
   otsuThreshold(imageData); // Otsu threshold for clear binary image
 }
 
-function advancedSharpen(imageData) {
-  const blurRadius = 1; // Consider implementing a real blur function with this radius
-  const amount = 2; // Increase the amount for more pronounced sharpening
-
-  let blurredImageData = new ImageData(
-    new Uint8ClampedArray(imageData.data),
-    imageData.width,
-    imageData.height,
-  );
-
-  blurARGB(blurredImageData, blurRadius); // Apply blur for the unsharp mask
-
-  // Implementing a basic edge detection might go here
-  // For now, we'll proceed without it for simplicity
-
-  // Unsharp mask: subtract the blurred image from the original
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    for (let channel = 0; channel < 3; channel++) {
-      let originalVal = imageData.data[i + channel];
-      let blurredVal = blurredImageData.data[i + channel];
-      // Sharpen more by increasing the difference applied
-      let newVal = originalVal + (originalVal - blurredVal) * amount;
-      imageData.data[i + channel] = Math.min(255, Math.max(0, newVal));
-    }
-  }
-}
-
 function otsuThreshold(imageData) {
   const histogram = new Array(256).fill(0);
   const width = imageData.width;
