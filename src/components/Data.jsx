@@ -32,23 +32,7 @@ export default function Data() {
       </div>
       <h1 className="text-4xl font-semibold text-center mt-4">Your Data</h1>
       <div className="md:mx-14 mt-5 mx-5">
-        <ul>
-          <li className="text-xl font-semibold pb-4">
-            Name: {location.state?.Name}
-          </li>
-          <li className="text-xl font-semibold pb-4">
-            DOB: {location.state?.DOB}
-          </li>
-          <li className="text-xl font-semibold pb-4">
-            Address: {location.state?.Address}
-          </li>
-          <li className="text-xl font-semibold pb-4">
-            License Number: {location.state?.LicenseNumber}
-          </li>
-          <li className="text-xl font-semibold pb-4">
-            Expiry Date: {location.state?.ExpiryDate}
-          </li>
-        </ul>
+        <p>{location.state?.data}</p>
       </div>
       <div className="flex items-center justify-center gap-4">
         <p>Data Not Correct? </p>

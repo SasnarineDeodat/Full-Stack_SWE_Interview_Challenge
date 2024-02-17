@@ -28,7 +28,7 @@ export default function useParseImage(imageSrc, handleOpen) {
         setLoading(false);
         handleOpen();
         const data = parseData(ret.data.text);
-        navigate("/data", { state: { image: imageSrc, ...data } });
+        navigate("/data", { state: { image: imageSrc, data } });
       } catch (error) {
         console.error("OCR processing failed:", error);
         setText("Error processing image");

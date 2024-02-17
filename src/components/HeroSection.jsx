@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import hero_image_dark from "../assets/hero_image_dark.png";
 import hero_image_light from "../assets/hero_image_light.png";
 import { Button } from "@material-tailwind/react";
