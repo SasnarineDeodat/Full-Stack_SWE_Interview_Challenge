@@ -38,8 +38,9 @@ export default function DialogBox({ open, handleOpen }) {
           Scan Your Driver's License
         </DialogHeader>
         <DialogBody className="font-semibold overflow-y-auto">
-          Put your Driver's License in front of the camera and click on the
-          Capture button to extract all the details.
+          Put your Driver's License as close as possible in front of the camera
+          and click on the Capture button. Keep your hand still while you click
+          on the capture button.
           <div className="flex items-center flex-col mt-5 relative">
             <div className="absolute top-1/2 left-1/2">
               {loading && <Spinner className="h-16 w-16" />}
