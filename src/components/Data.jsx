@@ -32,7 +32,7 @@ export default function Data() {
       </div>
       <h1 className="text-4xl font-semibold text-center mt-4">Your Data</h1>
       <div className="md:mx-14 mt-5 mx-5">
-        <p>{location.state?.data}</p>
+        <p className="!whitespace-pre-line">{location.state?.data}</p>
       </div>
       <div className="flex items-center justify-center gap-4">
         <p>Data Not Correct? </p>
