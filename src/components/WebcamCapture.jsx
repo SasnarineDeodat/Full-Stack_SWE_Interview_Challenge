@@ -1,5 +1,5 @@
-import { useRef, useCallback, useEffect } from "react";
-import Webcam from "react-webcam";
+import React, { useRef, useCallback, useEffect } from 'react';
+import Webcam from 'react-webcam';
 
 const WebcamCapture = ({ onCapture, captureImage }) => {
   const webcamRef = useRef(null);
@@ -10,10 +10,10 @@ const WebcamCapture = ({ onCapture, captureImage }) => {
   }, [webcamRef, onCapture]);
 
   useEffect(() => {
-    if (captureImage) {
+    if(captureImage){
       capture();
     }
-  }, [captureImage]);
+  }, [captureImage])
 
   return (
     <>

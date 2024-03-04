@@ -83,16 +83,16 @@ Empty Line Removal: Any empty lines resulting from the correction process are re
 I faced two major problems while developing this application:
 
 Preprocessing the image - [tesseract.js](https://www.npmjs.com/package/tesseract.js) library wasn't accurate with the data it was extracting due to noise in the image and so much colors present. Accuracy was reduced even more because of the fact that the browser is not as capable as a server and has less resources to spare, which affected the processing capabilities of the OCR library. To tackle this problem, a function that could somehow reduce noise as much as possible along with making the text appear more readable for the library to extract it more accurately. Making this function was very tough since a lot of research was required to find the right method of binarization (Otsu Thresholding in my case) and finding the right processing techniques that enhance the readability of the image in a positive way.
-Parsing the extracted text - Even after preprocessing the image and using custom options during OCR to enhance its capabilities, there were still many impurities in the extracted text. In order to solve this, I used regex to find common errors and replaced them with the correct text.
+Parsing the extracted text - Even after preprocessing the image and using custom options during OCR to enhance its capabilities, there were still many impurities in the extracted text. In order to solve this, I used regex to find common errors and replaced them with the correct text. 
 
 # Notes
 
-When capturing the photo of your Driver's License, keep these points in mind:
+When capturing the photo of your Driver's License, keep these points in mind: 
 
 - Keep your hand still while clicking on the capture button.
 - Place the Driver's License as close as you can to the camera for better readability.
 - Try again if you think the data extracted is wrong.
 
-# Credits
+# Credits 
 
 This utility was developed by [Sasnarine Deodat](https://github.com/SasnarineDeodat).

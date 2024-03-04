@@ -20,7 +20,7 @@ export default function useParseImage(imageSrc, handleOpen) {
         const worker = await createWorker("eng");
         await worker.setParameters({
           tessedit_char_whitelist:
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/-",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 ,/-"
         });
         const ret = await worker.recognize(imageUrl);
         setText(ret.data.text);

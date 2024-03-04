@@ -1,7 +1,11 @@
+import "./App.css";
 import Data from "./components/Data";
 import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 
 const router = createBrowserRouter([
   {
@@ -13,10 +17,10 @@ const router = createBrowserRouter([
         element: <HeroSection />,
       },
       {
-        path: "data",
+        path: 'data',
         element: <Data />,
-      },
-    ],
+      }
+    ]
   },
 ]);
 
